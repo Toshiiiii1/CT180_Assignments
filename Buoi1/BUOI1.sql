@@ -1,62 +1,67 @@
 CREATE TABLE KHOAHOC (
-    MAKH varchar(255) PRIMARY KEY,
-    TENKH varchar(255),
-    NGAYBD date,
-    NGAYKT date,
+    MAKH varchar(4) PRIMARY KEY,
+    TENKH varchar(30) NOT NULL,
+    NGAYBD date NOT NULL,
+    NGAYKT date NOT NULL,
     CONSTRAINT CHK_DATE CHECK (NGAYBD < NGAYKT)
 );
 
 -- drop table
 
 CREATE TABLE CHUONGTRINH (
-    MACT varchar(255) PRIMARY KEY,
-    TENCT varchar(255)
+    MACT varchar(5) PRIMARY KEY,
+    TENCT varchar(255) NOT NULL
 );
 
 CREATE TABLE LOAILOP (
-    MALOAI varchar(255) PRIMARY KEY,
-    MACT varchar(255),
-    TENLOAI varchar(255),
+    MALOAI varchar(5) PRIMARY KEY,
+    MACT varchar(5) NOT NULL,
+    TENLOAI varchar(255) NOT NULL,
     CONSTRAINT FK_LOAILOP FOREIGN KEY (MACT) REFERENCES CHUONGTRINH(MACT)
 );
 
 CREATE TABLE LOP (
-    MALOP varchar(255) PRIMARY KEY,
-    MALOAI varchar(255),
-    TENLOP varchar(255),
-    SISO smallint CHECK (SISO > 12),
-    MAKH varchar(255),
+    MALOP varchar(4) PRIMARY KEY,
+    MALOAI varchar(5) NOT NULL,
+    TENLOP varchar(255) NOT NULL,
+    SISO int CHECK (SISO > 12),
+    MAKH varchar(4) NOT NULL,
     CONSTRAINT FK_LOP FOREIGN KEY (MALOAI) REFERENCES LOAILOP(MALOAI), FOREIGN KEY (MAKH) REFERENCES KHOAHOC(MAKH)
 );
 
 CREATE TABLE HOCVIEN (
-    MAHV varchar(255) PRIMARY KEY,
-    TENHV varchar(255),
-    GIOITINH smallint,
-    NGAYSINH date,
-    SDT int,
-    DIACHI varchar(255)
+    MAHV varchar(6) PRIMARY KEY,
+    TENHV varchar(255) NOT NULL,
+    GIOITINH smallint NOT NULL,
+    NGAYSINH date NOT NULL,
+    SDT int NOT NULL,
+    DIACHI varchar(255),
+    CHECK (NGAYSINH >= 0 AND NGAYSINH <= 1)
 );
 
+ALTER TABLE LOP
+MODIFY MALOP char(5) PRIMARY KEY;
+
 CREATE TABLE PHIEUTHU (
-    SOPT varchar(255) PRIMARY KEY,
-    MAHV varchar(255),
-    MALOP varchar(255),
-    NGAYLAPPHIEU date,
-    THANHTIEN int,
+    SOPT varchar(10) PRIMARY KEY,
+    MAHV varchar(6) NOT NULL,
+    MALOP varchar(4) NOT NULL,
+    NGAYLAPPHIEU date NOT NULL,
+    THANHTIEN int NOT NULL,
     CONSTRAINT FK_PHIEUTHU FOREIGN KEY (MAHV) REFERENCES HOCVIEN(MAHV), FOREIGN KEY (MALOP) REFERENCES LOP(MALOP)
 );
 
 CREATE TABLE MONHOC (
-    MAMH varchar(255) PRIMARY KEY,
-    TENMH varchar(255)
+    MAMH varchar(10) PRIMARY KEY,
+    TENMH varchar(30) NOT NULL
 );
 
 CREATE TABLE DIEM (
-    MAMH varchar(255),
-    MAHV varchar(255),
-    MALOP varchar(255),
-    DIEM int,
+    MAMH varchar(10) NOT NULL,
+    MAHV varchar(6) NOT NULL,
+    MALOP varchar(4) NOT NULL,
+    DIEM int NOT NULL,
+    CONSTRAINT CHK_DIEM CHECK (DIEM >= 0 AND DIEM <= 10),
     PRIMARY KEY(MAMH, MAHV, MALOP),
     CONSTRAINT FK_DIEM FOREIGN KEY (MAMH) REFERENCES MONHOC(MAMH), FOREIGN KEY (MAHV) REFERENCES HOCVIEN(MAHV), FOREIGN KEY (MALOP) REFERENCES LOP(MALOP)
 );
@@ -325,10 +330,47 @@ INSERT INTO DIEM values  ('MH02','HV0006', 'L001', 6.5);
 INSERT INTO DIEM values  ('MH03','HV0006', 'L001', 4.5);
 INSERT INTO DIEM values  ('MH04','HV0006', 'L001', 3.5);
 
-select * from khoahoc
-select * from chuongtrinh
-select * from loailop
-select * from lop
-select * from hocvien
-select * from phieuthu
+select * from khoahoc;
+select * from chuongtrinh;
+select * from loailop;
+select * from lop;
+select * from hocvien;
+select * from phieuthu;
+SELECT * FROM MONHOC;
+SELECT * FROM DIEM;
+
+-- Cau 3: khong them duoc vao bang PHIEUTHU do sai dinh dang ngay
+INSERT INTO PHIEUTHU
+VALUES ('PT00008','HV0012','L001','06-02-2021',1350000);
+
+-- Cau 4: khong them vao duoc bang LOP do si so < 12
+INSERT INTO LOP
+VALUES ('L004','LL002','Lớp 4',10,'K001');
+
+-- Cau 5: khong xoa dc, 
+DELETE FROM KHOAHOC
+WHERE MAKH = 'K001';
+
+-- Cau 6: xoa duoc
+DELETE FROM KHOAHOC
+WHERE MAKH = 'K002';
+
+-- Cau 7: de lua
+UPDATE PHIEUTHU
+SET THANHTIEN = 1350000 - (1350000 * 10 / 100)
+WHERE SOPT = 'PT000002';
+
+-- Cau 8: 
+ALTER TABLE LOP
+ADD HOCPHI INT CHECK (HOCPHI > 0);
+
+UPDATE LOP
+SET HOCPHI = 1350000
+WHERE MALOAI = 'LL001';
+
+UPDATE LOP
+SET HOCPHI = 1650000
+WHERE MALOAI = 'LL002';
+
+-- Cau 9:
 
