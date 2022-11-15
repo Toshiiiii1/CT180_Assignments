@@ -159,6 +159,11 @@ GROUP BY IDMAY;
 -- Cau 10:
 SELECT TENPHONG, SOMAY FROM PHONG;
 
+select tenphong, count(*) from
+phong inner join may on phong.mp = may.mp
+GROUP BY tenphong
+order by tenphong;
+
 -- Cau 11:
 SELECT IDPM, COUNT(IDPM) SO_LAN_CAI FROM CAIDAT
 GROUP BY IDPM;
@@ -235,14 +240,14 @@ SELECT MAY.TENMAY FROM
 (CAIDAT TEMP1 INNER JOIN (SELECT * FROM CAIDAT WHERE IDMAY = 'p6') TEMP2
 ON TEMP1.IDPM = TEMP2.IDPM)
 INNER JOIN MAY ON TEMP1.IDMAY = MAY.IDMAY
-WHERE TEMP1.IDMAY <> TEMP2.IDMAY;
+WHERE TEMP1.IDMAY <> 'p6';
 
 -- Cau 26:
 SELECT MAY.TENMAY, COUNT(MAY.TENMAY) FROM
 (CAIDAT TEMP1 INNER JOIN (SELECT * FROM CAIDAT WHERE IDMAY = 'p6') TEMP2
 ON TEMP1.IDPM = TEMP2.IDPM)
 INNER JOIN MAY ON TEMP1.IDMAY = MAY.IDMAY
-WHERE TEMP1.IDMAY <> TEMP2.IDMAY
+WHERE TEMP1.IDMAY <> 'p6'
 GROUP BY MAY.TENMAY
 HAVING COUNT(MAY.TENMAY) >= (SELECT COUNT(*) FROM CAIDAT WHERE IDMAY = 'p6');
 
@@ -251,7 +256,35 @@ SELECT MAY.TENMAY, COUNT(MAY.TENMAY) FROM
 (CAIDAT TEMP1 INNER JOIN (SELECT * FROM CAIDAT WHERE IDMAY = 'p2') TEMP2
 ON TEMP1.IDPM = TEMP2.IDPM)
 INNER JOIN MAY ON TEMP1.IDMAY = MAY.IDMAY
-WHERE TEMP1.IDMAY <> TEMP2.IDMAY
+WHERE TEMP1.IDMAY <> 'p2'
 GROUP BY MAY.TENMAY
 HAVING COUNT(MAY.TENMAY) = (SELECT COUNT(*) FROM CAIDAT WHERE IDMAY = 'p2');
+
+
+
+
+/* Cach giai cua co */
+-- 25
+select * from caidat order by idmay;
+select idmay
+from caidat 
+where idmay<>'p6' and idpm IN 
+    (select idpm from caidat where idmay='p6')
+-- 26 
+select idmay
+from caidat c join (select idpm from caidat where idmay='p6') p on c.idpm=p.idpm
+where idmay<>'p6'
+group by idmay having count(*) = (select count(*) from caidat where idmay='p6')
+-- 27
+ create table c27 as
+    select idmay
+    from caidat c join (select idpm from caidat where idmay='p2') p on c.idpm=p.idpm
+    where idmay<>'p2'
+    group by idmay having count(*) = (select count(*) from caidat where idmay='p2')
+select idmay
+from c27
+where idmay in ( select idmay
+                 from caidat 
+                group by idmay having count(*) = (select count(*) from caidat where idmay='p2'))
+drop table c27;
 
